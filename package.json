@@ -1,0 +1,30 @@
+{
+  "name": "twilio-tools",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "twilio:taskrouter:worker-configs": "node ./scripts/taskrouter/listWorkerConfigs.js",
+    "twilio:taskrouter:query-events": "node ./scripts/taskrouter/queryEvents.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "twilio": "^3.50.0",
+    "yargs": "^16.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.12",
+    "twilio-cli": "^2.6.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
