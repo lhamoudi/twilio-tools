@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "twilio:taskrouter:worker-configs": "node ./scripts/taskrouter/listWorkerConfigs.js",
-    "twilio:taskrouter:query-events": "node ./scripts/taskrouter/queryEvents.js"
+    "twilio:taskrouter:query-events": "node ./scripts/taskrouter/queryEvents.js",
+    "twilio:chat:list-users": "node ./scripts/chat/listUsersAndChannels.js"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
