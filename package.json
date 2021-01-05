@@ -9,12 +9,12 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "twilio": "^3.50.0",
-    "yargs": "^16.1.0"
+    "twilio": "^3.54.1",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "@types/node": "^12.7.12",
-    "twilio-cli": "^2.6.0"
+    "@types/node": "^12.19.12",
+    "twilio-cli": "^2.15.1"
   },
   "browserslist": {
     "production": [
