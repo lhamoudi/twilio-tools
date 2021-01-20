@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { log } = require("console");
-const Twilio = require("twilio")
+const Twilio = require("twilio");
 const args = require('yargs')(process.argv.slice(2))
     .array('excludeEventType')
     .array('includeColumn')
@@ -74,7 +74,7 @@ SearchFilter.COLUMN_CONFERENCE_ID = 'conferenceId';
 SearchFilter.COLUMN_CORRELATION_ID = 'correlationId';
 
 
-async function performQueryEvents(filter) {
+async function queryEvents(filter) {
 
     if (filter.excludedEventTypes.length > 0) {
         console.log(`Excluding event types: ${filter.excludedEventTypes}`);
@@ -102,6 +102,7 @@ async function performQueryEvents(filter) {
     const eventList = await client.taskrouter.workspaces(process.env.TWILIO_WORKSPACE_SID)
         .events
         .list({
+            //pageSize: 1000,
             startDate: filter.startDate,
             endDate: filter.endDate,
             ...(filter.filterType === SearchFilter.FILTER_TYPE_TASK_SID ? { taskSid: filter.filterValue } : {}),
@@ -157,4 +158,4 @@ if (!!extraIncludedColumns)
 
 
 const filter = new SearchFilter(startDate, endDate, filterType, filterValue, excludedEventTypes, includedColumns);
-performQueryEvents(filter);
+queryEvents(filter);
