@@ -3,14 +3,10 @@ const fs = require("fs");
 const Twilio = require("twilio");
 const args = require('yargs')(process.argv.slice(2))
     .array('userSid')
-    .usage('Usage: $0 --userSid=[USxxx]')
+    .number('cleanupOlderThan')
+    .usage('Usage: $0 --userSid=[USxxx] --cleanupOlderThan')
     .describe('userSid', '(Optional) Specific SID of user to look for')
-    .default('startDate', '4 hours ago')
-    .describe('endDate', 'End of search range')
-    .default('endDate', 'Current time')
-    .describe('includeColumn', 'Extra column(s) to display')
-    .describe('excludeEventType', 'Event(s) to be excluded from results')
-
+    .describe('cleanupOlderThan', '(Optional) Age in days to cleanup/remove agent from joined channels. Must supply userSid too')
     .argv;
 
 const accountSid = process.env.TWILIO_ACCT_SID;
@@ -24,15 +20,12 @@ const client = Twilio(accountSid, authToken);
  * @param {*} sid 
  * @param {*} joinedChannels 
  */
-function UserWithChannels(name, sid, joinedChannels) {
+function UserWithChannels(name, sid, joinedChannels, joinedChannelsAfterClean) {
     this.name = name;
     this.sid = sid;
-    this.joinedChannels = joinedChannels ? joinedChannels : 0;
+    this.joinedChannels = joinedChannels;
+    this.joinedChannelsAfterClean = joinedChannelsAfterClean;
 }
-
-UserWithChannels.prototype.setJoinedChannels = function (joinedChannels) {
-    this.joinedChannels = joinedChannels ? joinedChannels : 0;
-};
 
 UserWithChannels.prototype.compareTo = function (other) {
     return (this.joinedChannels === other.joinedChannels) ? 0 : ((this.joinedChannels < other.joinedChannels) ? 1 : -1);
@@ -40,8 +33,10 @@ UserWithChannels.prototype.compareTo = function (other) {
 
 
 
-async function outputUsers(userSids, filename) {
+async function outputUsers(userSids, cleanupOlderThanDays, filename) {
     filename = !!filename ? filename : "output.csv";
+
+    const doCleanup = cleanupOlderThanDays >= 0;
 
     let usersWithChannels = [];
 
@@ -71,11 +66,32 @@ async function outputUsers(userSids, filename) {
     for (let i = 0; i < userIdentities.length; i++) {
         const user = await getUser(userIdentities[i]);
         if (user && user.sid) {
-            usersWithChannels.push(new UserWithChannels(user.friendlyName, user.sid, user.joinedChannelsCount));
+            let cleanedUp = 0;
+
+            // Do cleanup in here when applicable
+            if (doCleanup) {
+                const userChannels = await getUserChannels(user.sid);
+
+                const cutoff = new Date(new Date().getTime() - (cleanupOlderThanDays * 24 * 60 * 60 * 1000));
+                console.log(`  Found ${userChannels.length} channels for user ${user.sid}. Looking for those older than ${cleanupOlderThanDays} days (${cutoff})...`);
+                
+                for (let j=0; j < userChannels.length; j++) {
+                    const member = await getMember(userChannels[j].channelSid, userChannels[j].memberSid);
+                    if (member.dateUpdated < cutoff) {
+                        // Clean this one up
+                        await removeMemberFromChannel(member.channelSid, member.sid);
+                        cleanedUp++;
+                    }
+                    ((j+1) % 50 == 0) && console.log(`  Processed ${j+1} of ${userChannels.length}`);
+                }
+                console.log(`  Cleaned up ${cleanedUp} channels for user ${user.sid}`);
+            }
+
+            usersWithChannels.push(new UserWithChannels(user.friendlyName, user.sid, user.joinedChannelsCount, user.joinedChannelsCount-cleanedUp));
         } else {
             console.error(`Failed to load user with identity: ${userIdentities[i]}`);
         }
-        ((i+1) % 10 == 0) && console.log(`Processed ${i+1} of ${userIdentities.length}`);
+        ((i+1) % 50 == 0) && console.log(`Processed ${i+1} of ${userIdentities.length}`);
     }
     console.log(`Found ${usersWithChannels.length} users.`);
     const sortedList = usersWithChannels.sort((a, b) => a.compareTo(b));
@@ -84,6 +100,8 @@ async function outputUsers(userSids, filename) {
 
     console.log(`Top channel counts below (see ${filename} for full list)`);
     console.table(sortedList.length > 10 ? sortedList.slice(0, 10) : sortedList);
+
+
 }
 
 function escapeNonAlphaChars(stringToEscape, prefix = '_') {
@@ -121,6 +139,52 @@ async function getUser(identity) {
     return user;
 }
 
+/**
+ * Gets channels by user SID 
+ * 
+ * @param userSid 
+ */
+async function getUserChannels(userSid) {
+    // Get channels
+    const channels = await client
+        .chat.services(process.env.TWILIO_SERVICE_SID)
+        .users(userSid)
+        .userChannels
+        .list();
+    return channels;
+}
+
+/**
+ * Gets channel member
+ * 
+ * @param channelSid 
+ * @param memberSid
+ */
+async function getMember(channelSid, memberSid) {
+    // Get member
+    const member = await client
+        .chat.services(process.env.TWILIO_SERVICE_SID)
+        .channels(channelSid)
+        .members(memberSid)
+        .fetch();
+    return member;
+}
+
+/**
+ * Remove user from channel
+ * 
+ * @param channelSid 
+ * @param memberSid
+ */
+async function removeMemberFromChannel(channelSid, memberSid) {
+    // Get channel
+    await client
+        .chat.services(process.env.TWILIO_SERVICE_SID)
+        .channels(channelSid)
+        .members(memberSid)
+        .remove();
+}
+
 function writeCSVToFile(usersAndChannels, filename) {
      fs.writeFile(filename, extractAsCSV(usersAndChannels), err => {
         if (err) {
@@ -141,5 +205,6 @@ function extractAsCSV(usersAndChannels) {
 
 
 const userSids = args.userSid;
+const cleanupOlderThanDays = args.cleanupOlderThan;
 
-outputUsers(userSids);
+outputUsers(userSids, cleanupOlderThanDays);
