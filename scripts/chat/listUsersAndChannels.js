@@ -132,11 +132,16 @@ async function getWorkers() {
  */
 async function getUser(identity) {
     // Get user
-    const user = await client
-        .chat.services(process.env.TWILIO_SERVICE_SID)
-        .users(identity)
-        .fetch();
-    return user;
+    try {
+        const user = await client
+            .chat.services(process.env.TWILIO_CHAT_SERVICE_SID)
+            .users(identity)
+            .fetch();
+        return user;
+    } catch(err) {
+        console.log(`Error fetching user ${identity}`);
+        console.error(err);
+    }
 }
 
 /**
@@ -146,12 +151,17 @@ async function getUser(identity) {
  */
 async function getUserChannels(userSid) {
     // Get channels
-    const channels = await client
-        .chat.services(process.env.TWILIO_SERVICE_SID)
-        .users(userSid)
-        .userChannels
-        .list();
-    return channels;
+    try {
+        const channels = await client
+            .chat.services(process.env.TWILIO_CHAT_SERVICE_SID)
+            .users(userSid)
+            .userChannels
+            .list();
+        return channels;
+    } catch(err) {
+        console.log(`Error listing user channels for user ${userSid}`);
+        console.error(err);
+    }      
 }
 
 /**
@@ -162,12 +172,17 @@ async function getUserChannels(userSid) {
  */
 async function getMember(channelSid, memberSid) {
     // Get member
-    const member = await client
-        .chat.services(process.env.TWILIO_SERVICE_SID)
-        .channels(channelSid)
-        .members(memberSid)
-        .fetch();
-    return member;
+    try {
+        const member = await client
+            .chat.services(process.env.TWILIO_CHAT_SERVICE_SID)
+            .channels(channelSid)
+            .members(memberSid)
+            .fetch();
+        return member;
+    } catch(err) {
+        console.log(`Error fetching member ${memberSid} for channel ${channelSid}`);
+        console.error(err);
+    }
 }
 
 /**
@@ -178,11 +193,16 @@ async function getMember(channelSid, memberSid) {
  */
 async function removeMemberFromChannel(channelSid, memberSid) {
     // Get channel
+    try {
     await client
-        .chat.services(process.env.TWILIO_SERVICE_SID)
+        .chat.services(process.env.TWILIO_CHAT_SERVICE_SID)
         .channels(channelSid)
         .members(memberSid)
         .remove();
+    } catch(err) {
+        console.log(`Error removing member ${memberSid} from channel ${channelSid}`);
+        console.error(err);
+    }
 }
 
 function writeCSVToFile(usersAndChannels, filename) {
