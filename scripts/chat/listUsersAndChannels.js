@@ -77,7 +77,7 @@ async function outputUsers(userSids, cleanupOlderThanDays, filename) {
                 
                 for (let j=0; j < userChannels.length; j++) {
                     const member = await getMember(userChannels[j].channelSid, userChannels[j].memberSid);
-                    if (member.dateUpdated < cutoff) {
+                    if (member && member.dateUpdated < cutoff) {
                         // Clean this one up
                         await removeMemberFromChannel(member.channelSid, member.sid);
                         cleanedUp++;
