@@ -13,8 +13,7 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "@types/node": "^12.19.12",
-    "twilio-cli": "^2.15.1"
+    "@types/node": "^12.19.12"
   },
   "browserslist": {
     "production": [

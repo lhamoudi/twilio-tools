@@ -3,12 +3,38 @@ Snippets of code I've put together to help with Flex/Taskrouter/Video/anything T
 
 Docs are admittedly lacking!
 
-## Install dependencies:
+## Setup Steps
+
+1. Make sure you have Node.js as well as npm installed
+   - npm version 5.0.0 or later (type `npm -v` in your terminal to check)
+   - Node.js version 12 or later (type `node -v` in your terminal to check)
+
+2. Clone this repository
 
 ```
-npm install
+git clone https://github.com/lhamoudi/twilio-tools.git
 ```
 
+3. Install dependencies
+
+  ```
+  npm install
+  ```
+
+4. Make a copy of `.env.example`
+
+    ```bash
+    cp .env.example .env
+    ```
+
+5. Open `.env` with your text editor and set the environment variables mentioned in the file.
+
+    ```
+    TWILIO_ACCT_SID=ACXXX
+    TWILIO_ACCT_AUTH=XXX
+    TWILIO_WORKSPACE_SID=WSXXX
+    TWILIO_CHAT_SERVICE_SID=ISXXX
+    ```
 ## Taskrouter: Query Events
 
 `/scripts/taskrouter/queryEvents.js`
