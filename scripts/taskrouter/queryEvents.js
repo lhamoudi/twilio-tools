@@ -4,7 +4,7 @@ const Twilio = require("twilio");
 const args = require('yargs')(process.argv.slice(2))
     .array('excludeEventType')
     .array('includeColumn')
-    .usage('Usage: $0 --startDate=[date] --endDate=[date] --filterType=[taskSid|workerSid|task_attributes__<attribute-name>] --filterValue=[text]')
+    .usage('Usage: $0 --startDate=[date] --endDate=[date] --filterType=[taskSid|workerSid|taskQueueSid|workflowSid|taskChannel|task_attributes__<attribute-name>] --filterValue=[text]')
     .example('$0 --startDate=2020-10-25T00:00:00-07:00 --endDate=2020-10-25T21:00:00-07:00 --filterType=task_attributes__channelSid --filterValue=CHc03ffaacf8f14027a25f2fc5e0482066', 'List all event data related to the chat channel SID')
     .example('$0 --startDate 2020-11-02T10:00:00-07:00 --endDate 2020-11-02T12:00:00-07:00 --filterType task_attributes__correlationId --filterValue 0000000094886693 --excludeEventType workflow.target-matched workflow.entered --includeColumn task_attributes__channelSid task_attributes__conferenceId workerName', 'List all event data related to the correlation ID, and add extra columns')
     .demandOption(['filterType', 'filterValue'])
@@ -63,6 +63,10 @@ function SearchFilter(startDate, endDate, filterType, filterValue, excludedEvent
 
 SearchFilter.FILTER_TYPE_TASK_SID = 'taskSid';
 SearchFilter.FILTER_TYPE_WORKER_SID = 'workerSid';
+SearchFilter.FILTER_TYPE_TASK_QUEUE_SID = 'taskQueueSid';
+SearchFilter.FILTER_TYPE_WORKFLOW_SID = 'workflowSid';
+SearchFilter.FILTER_TYPE_TASK_CHANNEL = 'taskChannel';
+
 SearchFilter.FILTER_TYPE_TASK_ATTRIBUTE = 'task_attributes__';
 
 SearchFilter.COLUMN_TASK_SID = 'taskSid';
@@ -70,9 +74,6 @@ SearchFilter.COLUMN_TASK_QUEUE = 'taskQueue';
 SearchFilter.COLUMN_WORKER_SID = 'workerSid';
 SearchFilter.COLUMN_WORKER_NAME = 'workerName';
 SearchFilter.COLUMN_CHANNEL_SID = 'channelSid';
-SearchFilter.COLUMN_CONFERENCE_ID = 'conferenceId';
-SearchFilter.COLUMN_CORRELATION_ID = 'correlationId';
-
 
 async function queryEvents(filter) {
 
@@ -106,7 +107,9 @@ async function performQueryEvents(filter) {
             startDate: filter.startDate,
             endDate: filter.endDate,
             ...(filter.filterType === SearchFilter.FILTER_TYPE_TASK_SID ? { taskSid: filter.filterValue } : {}),
-            ...(filter.filterType === SearchFilter.FILTER_TYPE_WORKER_SID ? { workerSid: filter.filterValue } : {})
+            ...(filter.filterType === SearchFilter.FILTER_TYPE_WORKER_SID ? { workerSid: filter.filterValue } : {}),
+            ...(filter.filterType === SearchFilter.FILTER_TYPE_TASK_QUEUE_SID ? { taskQueueSid: filter.filterValue } : {}),
+            ...(filter.filterType === SearchFilter.FILTER_TYPE_WORKFLOW_SID ? { workflowSid: filter.filterValue } : {})
         });
     return eventList;
 }
