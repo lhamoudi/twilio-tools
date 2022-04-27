@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
+    "json-2-csv": "^3.17.1",
     "twilio": "^3.54.1",
     "yargs": "^16.2.0"
   },
