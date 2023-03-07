@@ -5,6 +5,7 @@
   "scripts": {
     "twilio:taskrouter:worker-configs": "node ./scripts/taskrouter/listWorkerConfigs.js",
     "twilio:taskrouter:query-events": "node ./scripts/taskrouter/queryEvents.js",
+    "twilio:voice:create-calls": "node ./scripts/voice/createCalls.js",
     "twilio:chat:list-users": "node ./scripts/chat/listUsersAndChannels.js"
   },
   "dependencies": {

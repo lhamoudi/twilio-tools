@@ -35,6 +35,8 @@ function SimpleTaskrouterEvent(taskrouterEvent, filter) {
         this.taskSid = taskrouterEvent.eventData.task_sid;
     if (!!taskrouterEvent.eventData.task_queue_name && includedColumns.indexOf(SearchFilter.COLUMN_TASK_QUEUE) > -1)
         this.taskQueue = taskrouterEvent.eventData.task_queue_name;
+    if (!!taskrouterEvent.eventData.task_channel_unique_name && includedColumns.indexOf(SearchFilter.COLUMN_TASK_CHANNEL_NAME) > -1)
+        this.taskChannelName = taskrouterEvent.eventData.task_channel_unique_name;        
     if (!!taskrouterEvent.eventData.worker_sid && includedColumns.indexOf(SearchFilter.COLUMN_WORKER_SID) > -1)
         this.workerSid = taskrouterEvent.eventData.worker_sid;
     if (!!taskrouterEvent.description && includedColumns.indexOf(SearchFilter.COLUMN_DESCRIPTION) > -1)
@@ -43,6 +45,9 @@ function SimpleTaskrouterEvent(taskrouterEvent, filter) {
         this.workerName = taskrouterEvent.eventData.worker_name.slice(0, taskrouterEvent.eventData.worker_name.indexOf('@'));  // Get rid of the email address part
     if (!!taskrouterEvent.eventData.reservation_reason_code && includedColumns.indexOf(SearchFilter.COLUMN_RESERVATION_REASON_CODE) > -1)
         this.reservationReasonCode = taskrouterEvent.eventData.reservation_reason_code;    
+    if (!!taskrouterEvent.eventData.worker_activity_name && includedColumns.indexOf(SearchFilter.COLUMN_WORKER_ACTIVITY_NAME) > -1)
+        this.workerActivityName = taskrouterEvent.eventData.worker_activity_name;    
+    
     if (!!taskrouterEvent.eventData.task_attributes) {
         const taskAttribs = JSON.parse(taskrouterEvent.eventData.task_attributes);
         Object.keys(taskAttribs).forEach(key => {
@@ -84,9 +89,11 @@ SearchFilter.COLUMN_TASK_SID = 'taskSid';
 SearchFilter.COLUMN_TASK_QUEUE = 'taskQueue';
 SearchFilter.COLUMN_WORKER_SID = 'workerSid';
 SearchFilter.COLUMN_WORKER_NAME = 'workerName';
-SearchFilter.COLUMN_CHANNEL_SID = 'channelSid';
+SearchFilter.COLUMN_CHANNEL_SID = 'channelSid'; // Chat channel sid
+SearchFilter.COLUMN_TASK_CHANNEL_NAME = 'taskChannelName';
 SearchFilter.COLUMN_DESCRIPTION = 'description';
 SearchFilter.COLUMN_RESERVATION_REASON_CODE = 'reservationReasonCode';
+SearchFilter.COLUMN_WORKER_ACTIVITY_NAME = 'workerActivityName'
 
 
 async function queryEvents(filter) {
@@ -143,7 +150,6 @@ async function performQueryEvents(filter) {
             ...(filter.filterType === SearchFilter.FILTER_TYPE_TASK_QUEUE_SID ? { taskQueueSid: filter.filterValue } : {}),
             ...(filter.filterType === SearchFilter.FILTER_TYPE_WORKFLOW_SID ? { workflowSid: filter.filterValue } : {}),
             ...(filter.filterType === SearchFilter.FILTER_TYPE_TASK_CHANNEL ? { taskChannel: filter.filterValue } : {})
-
         });
     return eventList;
 }
