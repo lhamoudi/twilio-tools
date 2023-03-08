@@ -1,6 +1,7 @@
 require("dotenv").config();
 const fs = require("fs");
 const Twilio = require("twilio");
+const { number } = require("yargs");
 const args = require("yargs")(process.argv.slice(2))
   .string("fromNumber")
   .string("toNumber")
@@ -48,7 +49,7 @@ async function createCalls(
 
     const callPromises = [];
 
-    for (let i = 0; i < callsPerSecond; i++) {
+    for (let i = 0; i < callsPerSecond && numberOfCallsPlaced < maxCalls; i++) {
       const call = client.calls.create({
         twiml: `<Response><Say>Hi there! Hang tight for a bit while we do this test why dontcha?!</Say><Pause length="${callDuration}"/></Response>`,
         to: toNumber,
