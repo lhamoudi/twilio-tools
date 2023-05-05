@@ -62,7 +62,7 @@ npm run twilio:voice:create-calls -- --fromNumber=+13334445555 --toNumber=+19998
 
 Expands on events API by allowing you to filter on task attributes too - making it possible to see a full sequence of task-related events related to, say, the same chat channel SID.
 
-Lots of things can be filtered on (any task attribute - using a special convention as below), and similarly various columns can be included. This overcomes some of the limitations of the events API (e.g. not being able to query on a task attribute), but comes at a cost - as the script needs to pull **ALL** of the workspace’s events for a particular timeframe in order to programmatically inspect the task attributes.
+Lots of things can be filtered on (any task attribute - using a special dot notation as below), and similarly various columns can be included. This overcomes some of the limitations of the events API (e.g. not being able to query on a task attribute), but comes at a cost - as the script needs to pull **ALL** of the workspace’s events for a particular timeframe in order to programmatically inspect the task attributes.
 
 **IMPORTANT:** Timeframe needs to be specified carefully to ensure semi-speedy responses - since events API will return **A LOT** of results on a production system! And nodeJS will automatically pull all the pages too.
 
@@ -72,15 +72,19 @@ npm run twilio:taskrouter:query-events`
 
 ### Examples
 
-Find all events relating to a particular chat channel SID over a time range. Swap the task_attributes\_\_channelSid for any other attribute you want to filter on. Optionally exclude certain event types to reduce noise. Optionally include extra columns in the results.
+Find all events relating to a particular task attribute over a time range.  Optionally exclude certain event types to reduce noise.  Optionally include extra columns in the results.
 
 ```
-npm run twilio:taskrouter:query-events -- --startDate 2020-11-02T10:00:00-07:00 --endDate 2020-11-02T14:00:00-07:00 --filterType task_attributes__channelSid --filterValue CH473f4625d17d4059a7e85429308077e1 --excludeEventType workflow.target-matched workflow.entered --includeColumn task_attributes__conferenceId workerName taskQueue
+npm run twilio:taskrouter:query-events -- --startDate 2023-05-04T14:00:00-07:00 --endDate 2023-05-04T17:00:00-07:00 --filterType task_attributes.isVideo --filterValue true --excludeEventType workflow.target-matched workflow.entered  --includeColumn workerName taskQueue task_attributes.conversations.conversation_label_1
 ```
 
-## List Workers and Configured Channel Capacities
+![Query Events Screenshot](/screenshots/query-events.png "Query Events Screenshot")
+
+## List Workers and Configured Channel Capacities (Flex 1.x only)
 
 `/scripts/taskrouter/listWorkerConfig.js`
+
+__IMPORTANT: ONLY VALID FOR FLEX 1.x.__ FLEX 2.x USES PROGRAMMABLE MESSAGING AND CONVERSATIONS APIS.
 
 Quick way to view all workers and their configured channel capacities. Simply grabs all the Taskrouter workers and their channel capacities, and outputs to a file - to save the need to click into each worker via Taskrouter Workers UI in Twilio Console.
 
