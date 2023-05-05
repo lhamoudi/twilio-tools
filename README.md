@@ -45,7 +45,7 @@ npm install
 Uses the Voice Create Call API to fire off a number of calls to a given number. This is useful for testing Voice queues and Taskrouter workflows under high load scenarios.
 
 ```
-npm run twilio:voice:create-calls`
+npm run twilio:voice:create-calls
 ```
 
 ### Examples
